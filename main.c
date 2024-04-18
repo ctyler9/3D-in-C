@@ -193,16 +193,17 @@ void window_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 int main(void) {
-  Tri side[TRIS_PER_SIDE] = {0};
-  cube_side(1.0f, side);
+  Tri mesh[TRIS_PER_CUBE] = {0};
 
-  for (size_t i = 0; i < TRIS_PER_SIDE; ++i) {
+  size_t count = cube(mesh);
+
+  for (size_t i = 0; i < count; ++i) {
     for (size_t j = 0; j < TRI_VERTICES; ++j) {
-      printf(V4_Fmt "\n", V4_Arg(side[i].vs[j]));
+
+      printf(V4_Fmt "\n", V4_Arg(mesh[i].vs[j]));
     }
     printf("---------------------\n");
   }
-
   return 0;
 }
 

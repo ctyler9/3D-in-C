@@ -1,3 +1,5 @@
 # OpenGL Template
 
-Just a simple OpenGL template that I use on my streams.
+3d in OpenGL
+
+- https://www.youtube.com/watch?v=Om-LVyWEm1k

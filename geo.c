@@ -1,33 +1,29 @@
 #include "./geo.h"
+#include <assert.h>
 #include <stdio.h>
-// #include <stdlib.h>
 
 V4 V4_add(V4 a, V4 b) {
-  return (V4){
-      .x = a.x + b.x,
-      .y = a.y + b.y,
-      .z = a.z + b.z,
-      .w = a.w + b.w,
-  };
+  for (size_t i = 0; i < TRI_VERTICES; ++i) {
+    a.cs[i] += b.cs[i];
+  }
+  return a;
 }
 
 V4 V4_scale(V4 a, float s) {
-  return (V4){
-      .x = a.x * s,
-      .y = a.y * s,
-      .z = a.z * s,
-      .w = a.w * s,
-  };
+  for (size_t i = 0; i < TRI_VERTICES; ++i) {
+    a.cs[i] *= s;
+  }
+  return a;
 }
 
-void cube_face(float size, Tri face[TRIS_PER_FACE]) {
+void cube_face(size_t a, size_t b, size_t c, float cv,
+               Tri mesh[TRIS_PER_FACE]) {
   for (size_t i = 0; i < TRIS_PER_FACE; ++i) {
     for (size_t j = 0; j < TRI_VERTICES; ++j) {
       size_t k = i + j;
-      face[i].vs[j].x = (float)(k & 1) * size;
-      face[i].vs[j].y = (float)(k >> 1) * size;
-      face[i].vs[j].z = 0.0f;
-      face[i].vs[j].w = 0.0f;
+      mesh[i].vs[j].cs[a] = (float)(k & 1);
+      mesh[i].vs[j].cs[b] = (float)(k >> 1);
+      mesh[i].vs[j].cs[c] = cv;
     }
   }
 }
@@ -35,16 +31,33 @@ void cube_face(float size, Tri face[TRIS_PER_FACE]) {
 void tri_translate(Tri *tri, V4 dir) {
 
   for (size_t i = 0; i < TRI_VERTICES; ++i) {
-    tri->vs[i] = v4_add(tri->vs[i], dir);
+    tri->vs[i] = V4_add(tri->vs[i], dir);
   }
 }
 
-void cube(float size, Tri cube[TRIS_PER_CUBE]) {
+size_t cube(Tri mesh[TRIS_PER_CUBE]) {
   size_t count = 0;
 
-  Tri face[TRIS_PER_FACE];
-  cube_face(size_face);
+  Tri face_mesh[TRIS_PER_FACE] = {0};
 
-  cube[count++] = face[0];
-  cube[count++] = face[1];
+  size_t face_pairs[CUBE_FACE_PAIRS][V3_COMPS] = {
+      {X, Y, Z},
+      {Z, Y, X},
+      {X, Z, Y},
+  };
+
+  for (size_t i = 0; i < CUBE_FACE_PAIRS; ++i) {
+    for (size_t j = 0; j < PAIR_COMPS; ++j) {
+      cube_face(face_pairs[i][0], face_pairs[i][1], face_pairs[i][2], (float)j,
+                face_mesh);
+
+      for (size_t k = 0; k < TRIS_PER_FACE; ++k) {
+        mesh[count++] = face_mesh[i];
+      }
+    }
+  }
+
+  assert(count == TRIS_PER_CUBE);
+
+  return count;
 }
